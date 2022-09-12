@@ -57,3 +57,71 @@ INSERT INTO EmployeeData VALUES(NULL, "Diana", "Lorentz", "DLORENTZ", "590.423.5
 INSERT INTO EmployeeData VALUES(NULL, "Nancy", "Greenberg", "NGREENBE", "515.124.4569", "1994-08-17", "FI_MGR", 12000, NULL, 101, 100);
 INSERT INTO EmployeeData VALUES(NULL, "Daniel", "Faviet", "DFAVIET", "515.124.4169", "1994-08-12", "FI_ACCOUNT", 9000, NULL, 108, 170);
 INSERT INTO EmployeeData VALUES(NULL, "John", "Chen", "JCHEN", "515.124.4269", "1997-04-09", "FI_ACCOUNT", 8200, NULL, 108, 170);
+
+/* 1. Select employees first name, last name, job_id and salary whose first name starts with alphabet S.*/
+
+SELECT first_name, last_name, job_id FROM EmployeeData WHERE first_name REGEXP "^S.*$";
+
+/* 2. Write a query to select employee with the highest salary. */
+
+SELECT * FROM EmployeeData ORDER BY salary DESC LIMIT 1;
+/* ALTERNATE ANS --> SELECT * FROM (SELECT *, DENSE_RANK() OVER( ORDER BY Salary DESC) Salary_Rank FROM EmployeeData) TEMP WHERE Salary_Rank = 1; */
+
+/* 3. Select employee with the second highest salary. */
+
+SELECT * FROM (SELECT *, DENSE_RANK() OVER( ORDER BY Salary DESC) Salary_Rank FROM EmployeeData) Salary_Rank WHERE Salary_Rank = 2;
+
+/* 4. Fetch employees with 2nd or 3rd highest salary. */
+
+SELECT * FROM (SELECT *, DENSE_RANK() OVER( ORDER BY Salary DESC) Salary_Rank FROM EmployeeData) Salary_Rank WHERE Salary_Rank = 2 OR Salary_Rank = 3;
+
+/* 5. Write a query to select employees and their corresponding managers and their salaries (use Self join in this case) */
+
+SELECT
+CONCAT(e.first_name, ' ', e.last_name) AS Employee,
+e.Salary AS Employee_Salary,
+CONCAT(m.first_name, ' ', m.last_name) AS Manager
+FROM EmployeeData e
+INNER JOIN EmployeeData m ON e.manager_id = m.employee_id
+ORDER BY Manager;
+
+/* 6. Write a query to show count of employees under each manager in descending order. */
+
+SELECT
+CONCAT(m.first_name, ' ', m.last_name) AS Manager,
+COUNT(*) AS EmployeeCount
+FROM EmployeeData e
+INNER JOIN EmployeeData m ON e.manager_id = m.employee_id
+GROUP BY Manager
+ORDER BY EmployeeCount DESC;
+
+/* 7. Find the count of employees in each department.*/
+
+SELECT
+d.department_name AS Department,
+COUNT(e.department_id) AS EmployeeCount
+FROM DepartmentData d
+LEFT JOIN EmployeeData e ON d.department_id = e.department_id
+GROUP BY Department
+ORDER BY EmployeeCount DESC;
+
+/* 8. Get the count of employees hired year wise. */
+SET @year = 1994;
+SELECT YEAR(hire_date) AS Year, COUNT(*) AS EmployeeCount FROM EmployeeData WHERE YEAR(hire_date) = @year;
+
+/* 9. Find the salary range of employees. */
+
+SELECT MIN(Salary) AS min, MAX(Salary) AS max FROM EmployeeData;
+
+/* 10. Write a query to divide people into three groups based on their salaries. */
+
+SELECT
+CONCAT(first_name, ' ', last_name) AS Employee,
+Salary,
+IF(Salary < 5000, "LOW", IF(Salary BETWEEN 5000 AND 10000, "MID", "HIGH")) AS Level
+FROM EmployeeData
+ORDER BY Salary DESC;
+
+/* 11. Select the employees whose first_name contains “an”. */
+
+SELECT * FROM EmployeeData WHERE first_name LIKE "%an%";
