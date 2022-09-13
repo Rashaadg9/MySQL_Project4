@@ -125,3 +125,51 @@ ORDER BY Salary DESC;
 /* 11. Select the employees whose first_name contains “an”. */
 
 SELECT * FROM EmployeeData WHERE first_name LIKE "%an%";
+
+/* 12. Select employee first name and the corresponding phone number in the format (_ _ _)-(_ _ _)-(_ _ _ _). */
+SET GLOBAL log_bin_trust_function_creators = 1;
+DELIMITER //
+CREATE FUNCTION FormatPhoneNumber(PhoneNumber VARCHAR(255))
+RETURNS VARCHAR(255)
+BEGIN
+DECLARE NUM VARCHAR(255);
+SET NUM = CONCAT('(', SUBSTR(PhoneNumber, 1, 3), ')', SUBSTR(PhoneNumber, 4, 1), '(', SUBSTR(PhoneNumber, 5, 3), ')', SUBSTR(PhoneNumber, 8, 1), '(', SUBSTR(PhoneNumber, 9, 4), ')');
+SET NUM = REPLACE(NUM, '.', '-');
+RETURN NUM;
+END //
+DELIMITER ;
+
+SELECT first_name, FormatPhoneNumber(phone_number) FROM EmployeeData;
+
+/* 13. Find the employees who joined in August, 1994. */
+
+SELECT * FROM EmployeeData WHERE YEAR(hire_date) = "1994" and MONTH(hire_date) = "8";
+
+/* 14. Write an SQL query to display employees who earn more than the average salary in that company. */
+
+SELECT * FROM EmployeeData WHERE salary > (SELECT FLOOR(AVG(salary)) FROM EmployeeData);
+
+/* 15. Find the maximum salary from each department. */
+
+SELECT D.department_name, IFNULL(MAX(E.salary), 0) AS MaximumSalary
+FROM DepartmentData D
+LEFT JOIN EmployeeData E ON D.department_id = E.department_id
+GROUP BY D.department_name
+ORDER BY MaximumSalary DESC;
+
+/* 16. Write a SQL query to display the 5 least earning employees. */
+
+SELECT * FROM EmployeeData ORDER BY Salary ASC LIMIT 5;
+
+/* 17. Find the employees hired in the 80s. */
+
+SELECT * FROM EmployeeData WHERE YEAR(hire_date) BETWEEN "1980" AND "1989";
+
+/* 18. Display the employees first name and the name in reverse order. */
+
+SELECT CONCAT(first_name, ' ', last_name) AS FullName FROM EmployeeData ORDER BY FullName DESC;
+SELECT CONCAT(first_name, ' ', last_name) AS FullName, CONCAT(REVERSE(last_name), ' ', REVERSE(first_name)) AS ReverseName FROM EmployeeData ORDER BY FullName DESC;
+
+/* 19. Find the employees who joined the company after 15th of the month. */
+
+SELECT * FROM EmployeeData WHERE DAY(hire_date) > "15";
