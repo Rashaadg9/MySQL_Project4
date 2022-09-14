@@ -173,3 +173,43 @@ SELECT CONCAT(first_name, ' ', last_name) AS FullName, CONCAT(REVERSE(last_name)
 /* 19. Find the employees who joined the company after 15th of the month. */
 
 SELECT * FROM EmployeeData WHERE DAY(hire_date) > "15";
+
+/* 20. Display the managers and the reporting employees who work in different departments. */
+
+SELECT
+CONCAT(m.first_name, ' ', m.last_name) AS Manager,
+md.department_name AS ManagerDepartment,
+CONCAT(e.first_name, ' ', e.last_name) AS Employee,
+ed.department_name AS EmployeeDepartment
+FROM EmployeeData e
+INNER JOIN EmployeeData m ON e.manager_id = m.employee_id
+INNER JOIN Departmentdata md ON m.department_id = md.department_id
+INNER JOIN Departmentdata ed ON e.department_id = ed.department_id
+WHERE md.department_id != ed.department_id
+ORDER BY Manager;
+
+/*Bonus Questions*/
+
+/*--------------------------------------------------------------------------------------------------------------------------------------------*/
+DELIMITER //
+CREATE TRIGGER EmailFormat BEFORE INSERT ON EmployeeData FOR EACH ROW
+BEGIN
+SET NEW.email = CONCAT(NEW.email, "@collabera.com");
+END //
+DELIMITER ;
+
+INSERT INTO EmployeeData VALUES(NULL, "Test", "Row", "TROW", "000.000.0000", "1987-06-17", "IT_PROG", 15000, NULL, 101, 60);
+
+
+/*--------------------------------------------------------------------------------------------------------------------------------------------*/
+
+
+TRUNCATE TABLE EmployeeData;
+ALTER TABLE EmployeeData AUTO_INCREMENT = 100;
+
+LOAD DATA INFILE "C:\\Java_WorkSpace\\mysqlprojects\\MySQL_Project4\\EmployeeData.csv"
+INTO TABLE EmployeeData
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS;
+
